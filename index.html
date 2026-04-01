@@ -8,7 +8,41 @@
 </head>
 <body>
 <div id ="app">
-    <div id="toolbar"></div>
+
+    <div id="toolbar">
+
+        <div class="tool-section">
+            <button class="tool-btn active" data-tool="select" title="Select / Move">
+                <svg viewBox="0 0 20 20">
+                    <path d="M4 2 L4 15 L7.5 12 L10 17 L12 16 L9.5 11 L14 11 Z"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="tool-section">
+            <button class="tool-btn" data-tool="point-source" title="Point Source">
+                <svg viewBox="0 0 20 20">
+                    <circle cx="10" cy="10" r="3"/>
+                    <line x1="10" y1="2" x2="10" y2="5"/>
+                    <line x1="10" y1="15" x2="10" y2="18"/>
+                    <line x1="2" y1="10" x2="5" y2="10"/>
+                    <line x1="15" y1="10" x1="18" y2="10"/>
+                    <line x1="4.2" y1="4.2" x2="6.3" y2="6.3"/>
+                    <line x1="13.7" y1="13.7" x2="15.8" y2="15.8"/>
+                    <line x1="15.8" y1="4.2" x2="13.7" y2="6.3"/>
+                    <line x1="4.2" y1="15.8" x2="6.3" y2="13.7"/>
+                </svg>
+            </button>
+            <button class="tool-btn" data-tool="laser-beam" title="Laser Beam">
+                <svg viewBox="0 0 20 20">
+                    <rect x="2" y="8" width="10" height="4" rx="2"/>
+                    <line x1="12" y1="10" x2="18" y2="10"?>
+                    <polyline points="15,7 18,10 15,13"/>
+                </svg>
+            </button>
+        </div>
+
+        <div 
     <div id="canvas-area">
         <canvas id="canvas"></canvas>
     </div>
