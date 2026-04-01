@@ -1,0 +1,42 @@
+:root {
+    --bg-primary: #0a0a0f;
+    --bg-panel: #12121a;
+    --border: #2a2a3a;
+    --text-primary: #e0e0e8;
+}
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 11px;
+}
+#app {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+}
+#toolbar {
+    width: 52px;
+    min-width: 52px;
+    height: 100%;
+    background: var(--bg-panel);
+    border-right: 1px solid var(--border);
+}
+#canvas-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden; 
+}
+#canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
