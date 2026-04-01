@@ -1,8 +1,11 @@
 :root {
     --bg-primary: #0a0a0f;
     --bg-panel: #12121a;
+    --bg-panel-hover: #1a1a28;
     --border: #2a2a3a;
     --text-primary: #e0e0e8;
+    --text-secondary: #6a6a80;
+    --accent: #4491e8;
 }
 *, *::before, *::after {
     box-sizing: border-box;
@@ -30,6 +33,86 @@ html, body {
     background: var(--bg-panel);
     border-right: 1px solid var(--border);
 }
+
+#toolbar::-webkit-scrollbar{
+    width: 0;
+}
+
+.tool-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.tool-section:last-child {
+    border-bottom: none;
+}
+
+.tool-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1px 0;
+    position: relative;
+    transition: background 0.12s, color 0.12s;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.tool-btn:hover {
+    background: var(--bg-panel-hover);
+    color: var(--accent);
+}
+
+.tool-btn.active {
+    background: rgba(68, 145, 232, 0.13);
+    color: var(--accent);
+}
+
+.tool-btn svg {
+    width: 20px;
+    height: 20px;
+    fill:none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.tool-btn::after {
+    content: attr(title);
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg-panel-hover);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 4px 8px;
+    border-radius: 5px;
+    white-space: nowrap;
+    font-size: 11px;
+    font-family: system-ui, -apple-system, sans-serif;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s;
+    z-index: 100;
+}
+
+.tool-btn:hover::after {
+    opacity: 1;
+}
+
 #canvas-area {
     flex: 1;
     position: relative;
