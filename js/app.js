@@ -93,6 +93,75 @@ function intersect(ray, el) {
     }
 }
 
+function handleLens(ray, hit, endpoint, elements, depth, eps) {
+    const el = hit.element;
+    const { R, xcx, xcy, halfSpan, refractiveIndex } = hit.lensData;
+    const segs = [];
+    
+    const r1 = refract(ray.direction, hit.normal, 1.0, refractiveIndex);
+    if (!r1) return segs;
+
+    const d1 = normalize(r1);
+    const io = { x: endpoint.x + d1.x * eps, y: endpoint.y + d1.y * eps };
+
+    const ox = io.x, oy = io.y;
+    const dx = d1.x, dy = d1.y;
+    const ocx = ox - xcx, ocy = oy - xcy;
+    const qa = dx * dx + dy * dy;
+    const qb = 2 * (dx * ocx + dy * ocy);
+    const qc = ocx * ocx + ocy * ocy - R * R;
+    const disc = qb * qb - 4 * qa * qc;
+
+    if (disc < 0) {
+        segs.push({ from: io, to: { x: io.x + d1.x * 200, y: io.y + d1.y * 200 }, color: ray.color, intensity: ray.intensity * 0.5 });
+        segs.push(...castRay(new Ray({ ...io }, d1, ray.wavelength, ray.intensity * 0.9), elements, depth + 1, el.id));
+        return segs; 
+    }
+
+    const sq = Math.sqrt(disc);
+    const exitMid = Math.atan2(el.y - xcy, el.x - xcx);
+
+    let exitT = null, exitN = null;
+    for (const t of [(-qb - sq) / (2 * qa), (-qb + sq) / (2* qa)]) {
+        if (t < 0.01) continue;
+        const px = ox + dx * t - xcx;
+        const py = oy + dy * t - xcy;
+        const angle = Math.atan2(py, px);
+        let diff = angle - exitMid;
+        while (diff > Math.PI) diff -= 2 * Math.PI;
+        while (diff < -Math.PI) diff += 2 * Math.PI;
+        if (Math.abs(diff) > halfSpan) continue;
+        let nx = px / R, ny = py / R;
+        if (nx * dx + ny * dy > 0) { nx = -nx; ny = -ny; }
+        exitT = t; exitN = { x: nx, y: ny };
+        break;
+    }
+    if (exitT === null) {
+        segs.push(...castRay(new Ray({ ...io }, d1, ray.wavelength, ray.intensity * 0.9), elements, depth + 1, el.id));
+        return segs;
+    }
+
+    const ep = { x: ox + dx * exitT, y: oy + dy * exitT };
+    segs.push({ from: io, to: ep, color: ray.color, intensity: ray.intensity * 0.75 });
+
+    const r2 = refract(d1, exitN, refractiveIndex, 1.0);
+    if (!r2) {
+        const rd = normalize(reflect(d1, exitN));
+        segs.push(...castRay(
+            new Ray({ x: ep.x + rd.x * eps, y: ep.y + rd.y * eps }, rd, ray.wavelength, ray.intensity * 0.9),
+            elements, depth + 1, el.id
+        ));
+        return segs;
+    }
+
+    const fd = normalize(r2);
+    segs.push(...castRay(
+        new Ray({ x: ep.x + fd.x * eps, y: ep.y + fd.y * eps }, fd, ray.wavelength, ray.intensity * 0.95),
+        elements, depth + 1, el.id
+    ));
+    return segs;
+}
+
 function castRay(ray, elements, depth, sourceId) {
     if (depth >= ray.maxBounces || ray.intensity < 0.03) return [];
 
