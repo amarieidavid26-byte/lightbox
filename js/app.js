@@ -176,6 +176,21 @@ function castRay(ray, elements, depth, sourceId) {
     }
 }
 
+function insidePrism(point, el) {
+    const verts = prismVertices(el);
+    let sign = null;
+    for (let i = 0; i < 3; i++) {
+        const p1 = verts[i], p2 = verts[(i + 1) % 3];
+        const cross = (p2.x - p1.x) * (point.y - p1.y) - (p2.y - p1.y) * (point.x - p1.x);
+        const s = cross > 0;
+        if (sign === null) sign = s;
+        else if (s !== sign) return false; 
+    }
+    return true;
+}
+
+const SPECTRUM = [380, 430, 470, 510, 550, 590, 630, 670];
+
 function computeRays() {
     const segs = [];
     for (const light of scene.lights) {
