@@ -1,11 +1,16 @@
 function render(ctx, scene, segs) {
     const w = ctx.canvas.width / (window.devicePixelRatio || 1);
     const h = ctx.canvas.height / (window.devicePixelRatio || 1);
+
     ctx.fillStyle = '#0a0a0f';
     ctx.fillRect(0, 0, w, h);
+    
     if (scene.showGrid) drawGrid(ctx, w, h);
+    drawRays(ctx, segs);
+
     const all = [...scene.elements, ...scene.lights];
     for (const el of all) drawElement(ctx, el, el.id === scene.selectedId);
+    
     if (scene.selectedId) {
         const sel = all.find(e => e.id === scene.selectedId);
         if (sell) drawSelection(ctx, sel);

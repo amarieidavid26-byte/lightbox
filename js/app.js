@@ -83,6 +83,52 @@ function hitTest(pos, el) {
     }
 }
 
+function intersect(ray, el) {
+    switch (el.type) {
+        case 'flat-mirror': return intersectFlatMirror(ray, el);
+        case 'curved-mirror': return intersectCurvedMirror(ray, el);
+        case 'prism': return intersectPrism(ray, el);
+        case 'lens': return intersectLens(ray, el);
+        default: return null;
+    }
+}
+
+function castRay(ray, elements, depth, sourceId) {
+    if (depth >= ray.maxBounces || ray.intensity < 0.03) return [];
+
+    let nearest = null, nearestT = Infinity;
+    for (const el of elements) {
+        if (el.id === sourceId) continue;
+        const hit = intersect(ray, el);
+        if (hit && hit.t > 0.01 && hit.t < nearestT) {
+            nearest = { ...hit, element: el };
+            nearestT = hit.t;
+        }
+    }
+}
+
+function computeRays() {
+    const segs = [];
+    for (const light of scene.lights) {
+        if (light.type === 'point-source') {
+            const count = light.rayCount || 64;
+            for (let i = 0; i < count; i++) {
+                const angle = (2 * Math.PI * i) / count;
+                segs.push(...castRay(
+                    new Ray({ x: light.x, y: light.y }, { x: Math.cos(angle), y: Math.sin(angle) }, light.wavelength, light.intensity),
+                    scene.elements, 0, light.id
+                ));
+            }
+        } else if (light.type === 'laser-beam') {
+            segs.push(...castRay(
+                new Ray({ x: light.x, y: light.y }, { x: Math.cos(light.rotation), y: Math.sin(light.rotation) }, light.wavelength, light.intensity),
+                scene.elements, 0, light.id
+            ));
+        }
+    }
+    return segs;
+}
+
 function elementAt(pos) {
     const all = [...scene.lights, ...scene.elements];
     for (let i = all.length - 1; i >= 0; i--) {
@@ -116,7 +162,7 @@ function loop() {
         ctx = canvas.getContext('2d');
         ctx.scale(dpr, dpr);
     }
-    render(ctx, scene, []);
+    render(ctx, scene, computeRays);
     requestAnimationFrame(loop);
 }
 
