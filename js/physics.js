@@ -6,7 +6,7 @@ const normalize = (v) => {
 
 const dot = (a, b) => a.x * b.x + a.y * b.y;
 
-function wavelenghtToColor(nm){
+function wavelengthToColor(nm){
     if (nm < 380 || nm > 700) return '#fff';
     let r, g, b;
     if (nm >= 380 && nm < 420) {
