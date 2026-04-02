@@ -6,6 +6,10 @@ function render(ctx, scene, segs) {
     if (scene.showGrid) drawGrid(ctx, w, h);
     const all = [...scene.elements, ...scene.lights];
     for (const el of all) drawElement(ctx, el, el.id === scene.selectedId);
+    if (scene.selectedId) {
+        const sel = all.find(e => e.id === scene.selectedId);
+        if (sell) drawSelection(ctx, sel);
+    }
 }
 
 function drawElement(ctx, el, selected) {
@@ -68,7 +72,7 @@ function drawCurvedMirror(ctx, el, selected) {
 
     ctx.strokeStyle = selected ? 'rgba(68,145,232,0.4)' : 'rgba(136,136,170,0.35)';
     ctx.lineWidth = 1;
-    for (i = 0; i <= 8; i++) {
+    for (let i = 0; i <= 8; i++) {
         const a = start + (el.arcAngle / 8) * i;
         const px = cx + el.radius * Math.cos(a);
         const py = cy + el.radius * Math.sin(a);
@@ -179,6 +183,52 @@ function drawLaserBeam(ctx, el, selected) {
     ctx.lineTo(14 * 0.8, -7);
     ctx.lineTo(14 * 0.8, 7);
     ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+}
+
+function getRotationHandlePos(el) {
+    if (el.type === 'flat-mirror' || el.type === 'laser-beam') {
+        const nx = -Math.sin(el.rotation), ny = Math.cos(el.rotation);
+        return { x: el.x + nx * 44, y: el.y + ny * 44};
+    }
+    return { x: el.x, y: el.y - 40}
+}
+
+function drawSelection(ctx, el) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(68,145,232,0.4)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    let r = 30;
+    if (el.type === 'flat-mirror') r = el.length / 2 + 10;
+    else if (el.type === 'prism') r = el.sideLength * 0.7;
+    ctx.beginPath();
+    ctx.arc(el.x, el.y, r, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+
+    const handle = getRotationHandlePos(el);
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(68,145,232,0.5)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(el.x, el.y);
+    ctx.lineTo(handle.x, handle.y);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = '#4491e8';
+    ctx.fillStyle = 'rgba(68,145,232,0.25)';
+    ctx.lineWidth = 2;
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = '#4491e8';
+    ctx.beginPath();
+    ctx.arc(handle.x, handle.y, 7, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
     ctx.restore();
