@@ -1,9 +1,7 @@
 # Light Box 
-Light Box is a 2d ray optics simulator that runs in browser. you place a mirror, lenses (convex and concave) and prisms on a canvas and you watch light ray bounce, bend and split into rainbows in real time.
+2d ray optic simulator where you play around with mirrors, lenses and prisms on a canvas and watch the light rays bounce, bend, and split into rainbows. this is your chance to finally put in practice the useless formulas learned in physics classes
 
 i built this because i learnt about snell's law and cauchy's dispersion at school and wanted to see if i am capable of implementing them in an app to vizualize them.
-
-try it here! https://lightbox-beta.vercel.app/
 
 ## what it does 
 - place flat mirrors, curved mirrors (concave/convex), lenses and prisms
@@ -18,7 +16,7 @@ try it here! https://lightbox-beta.vercel.app/
 - refraction implements snell's law in vector form. total internal reflection kicks in automatically when the angle is too steep. lenses model both surfaces separately: ray enters, refracts, travels thru the glass, hits the exit surface, refracts again.
 - prism dispersion uses the cauchy equation `n(λ) = 1.522 + 0.00459/λ^2` to get slightly different refractive index for each wavelength. 
 
-##built with 
+## built with 
 - vanilla javascript + html canvas
 - zero dependencies, no frameworks, no build tools
 - all physics from scratch (no physics engine)
