@@ -174,6 +174,71 @@ function castRay(ray, elements, depth, sourceId) {
             nearestT = hit.t;
         }
     }
+    
+    const endpoint = nearest
+    ? { x: ray.origin.x + ray.direction.x * nearestT, y: ray.origin.y + ray.direction.y * nearestT }
+    : { x: ray.origin.x + ray.direction.x * 5000, y: ray.origin.y + ray.direction.y * 5000 };
+
+    const segs = [{ from: { ...ray.origin }, to: { ...endpoint }, color: ray.color, intensity: ray.intensity }];
+    if (!nearest) return segs;
+
+    const el = nearest.element;
+    const normal = nearest.normal;
+    const eps = 0.8;
+
+    if (el.type === 'flat-mirror' || el.type === 'curved-mirror') {
+        const rd = normalize(reflect(ray.direction, normal));
+        const child = new Ray(
+            { x: endpoint.x + rd.x * eps, y: endpoint.y + rd.y * eps },
+            rd, ray.wavelength, ray.intensity * (el.reflectivity || 1.0)
+        );
+        segs.push(...castRay(child, elements, depth + 1, el.id));
+        return segs;
+    }
+    
+    if (el.type === 'prism') {
+        const inside = insidePrism(ray.origin, el);
+
+        if (!inside && ray.wavelength === null && el.dispersive) {
+           for (const wl of SPECTRUM) {
+                const refracted = refract(ray.direction, normal, 1.0, cauchyN(wl));
+                if (refracted) {
+                const rd = normalize(refracted);
+                const child = new Ray(
+                    { x: endpoint.x + rd.x * eps, y: endpoint.y + rd.y * eps },
+                    rd, wl, ray.intensity / SPECTRUM.length
+                );
+                segs.push(...castRay(child, elements, depth + 1, el.id));
+                }
+           }
+           return segs;
+        }
+        const n1 = inside ? (ray.wavelength ? cauchyN(ray.wavelength) : el.refractiveIndex) : 1.0;
+        const n2 = inside ? 1.0 : (ray.wavelength ? cauchyN(ray.wavelength) : el.refractiveIndex);
+        const refracted = refract(ray.direction, normal, n1, n2);
+        if (refracted) {
+            const rd = normalize(refracted);
+            segs.push(...castRay(
+                new Ray({ x: endpoint.x + rd.x * eps, y: endpoint.y + rd.y * eps }, rd, ray.wavelength, ray.intensity * 0.97),
+                elements, depth + 1, el.id
+            ));
+        } else {
+            const rd = normalize(reflect(ray.direction, normal));
+            segs.push(...castRay(
+                new Ray ({ x: endpoint.x + rd.x * eps, y: endpoint.y + rd.y * eps }, rd, ray.wavelength, ray.intensity * 0.99),
+                elements, depth + 1, el.id
+            ));
+        }
+        return segs;
+    }
+
+    if (el.type === 'lens') {
+        if (!nearest.lensData) return segs;
+        segs.push(...handleLens(ray, nearest, endpoint, elements, depth, eps));
+        return segs;
+    }
+
+    return segs;
 }
 
 function insidePrism(point, el) {
@@ -246,15 +311,27 @@ function loop() {
         ctx = canvas.getContext('2d');
         ctx.scale(dpr, dpr);
     }
-    render(ctx, scene, computeRays);
+    render(ctx, scene, computeRays());
     requestAnimationFrame(loop);
 }
 
 function onDown(e) {
     if (e.button !==0) return;
-    const pos = { x: e.client.x - canvas.getBoundingClientRect().left, y: clientY - canvas.getBoundingClientRect().top };
+    const pos = { x: e.clientX - canvas.getBoundingClientRect().left, y: e.clientY - canvas.getBoundingClientRect().top };
     didDrag = false;
+
     if (PLACING.includes(scene.tool)) return;
+
+    if (scene.selectedId) {
+        const el = findById(scene.selectedId);
+        if(el) {
+            const h = getRotationHandlePos(el);
+            if (Math.hypot(pos.x - h.x, pos.y - h.y) < 14) {
+                scene.rotating = true;
+                return;
+            }
+        }
+    }
     const el = elementAt(pos);
     if (el) {
         scene.selectedId = el.id;
@@ -267,9 +344,31 @@ function onDown(e) {
     }
 }
 
+function onDbl(e) {
+    if (!scene.selectedId) return;
+    const el = findById(scene.selectedId);
+    if (!el) return;
+    if (el.type === 'curved-mirror') el.concave = !el.concave;
+    else if (el.type === 'lens') el.focalLength = -el.focalLength;
+}
+
 function onMove(e) {
-    const pos = { x: e.clientX - canvas.getBoundingClientRect().left, y: e.clientY - canvas.getBoundingClientRect() };
+    const pos = { x: e.clientX - canvas.getBoundingClientRect().left, y: e.clientY - canvas.getBoundingClientRect().top };
     scene.mousePos = pos;
+
+    if (scene.rotating && scene.selectedId) {
+        const el = findById(scene.selectedId);
+        if (el) {
+            el.rotation = Math.atan2(pos.y - el.y, pos.x - el.x);
+            if (el.type !== 'laser-beam') el.rotation += Math.PI / 2;
+            if (e.shiftKey) {
+                const snap = Math.PI / 12;
+                el.rotation = Math.round(el.rotation / snap) * snap;
+            }
+            didDrag = true;
+        }
+        return;
+    }
     if (scene.dragging) {
         const el = findById(scene.dragging);
         if (el && dragStart) {
@@ -285,10 +384,14 @@ function onMove(e) {
 function onUp(e) {
     if (e.button !==0) return;
     const pos = { x: e.clientX - canvas.getBoundingClientRect().left, y: e.clientY - canvas.getBoundingClientRect().top };
+
+    if (scene.rotating) { scene.rotating = false; return; }
+
     if (PLACING.includes(scene.tool)) {
         placeEl(scene.tool, pos);
         return;
     }
+
     scene.dragging = null;
     dragStart = null;
     dragOrig = null;
@@ -308,6 +411,7 @@ function onKey(e) {
 window.addEventListener('DOMContentLoaded', () => {
     canvas = document.getElementById('canvas');
     dpr = window.devicePixelRatio || 1;
+
     canvas.addEventListener('mousemove', onMove);
     window.addEventListener('keydown', onKey);
 
@@ -324,6 +428,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     canvas.addEventListener('mousedown', onDown);
     canvas.addEventListener('mouseup', onUp);
+    canvas.addEventListener('dblclick', onDbl);
     
     document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
         btn.addEventListener('click', () => {

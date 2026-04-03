@@ -10,11 +10,27 @@ function render(ctx, scene, segs) {
 
     const all = [...scene.elements, ...scene.lights];
     for (const el of all) drawElement(ctx, el, el.id === scene.selectedId);
-    
+
     if (scene.selectedId) {
         const sel = all.find(e => e.id === scene.selectedId);
-        if (sell) drawSelection(ctx, sel);
+        if (sel) drawSelection(ctx, sel);
     }
+}
+
+function drawRays(ctx, segs) {
+    ctx.save();
+    for (const seg of segs) {
+        ctx.globalAlpha = Math.min(1, Math.max(0.1, seg.intensity || 1));
+        ctx.strokeStyle = seg.color || '#ffe066';
+        ctx.lineWidth = 1.5;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = seg.color || '#ffe066';
+        ctx.beginPath();
+        ctx.moveTo(seg.from.x, seg.from.y);
+        ctx.lineTo(seg.to.x, seg.to.y);
+        ctx.stroke();
+    }
+    ctx.restore();
 }
 
 function drawElement(ctx, el, selected) {
