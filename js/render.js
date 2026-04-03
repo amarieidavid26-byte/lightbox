@@ -60,7 +60,7 @@ function updatePropsPanel(scene) {
 
     panel.innerHTML = `
     <div class="prop-title">${names[el.type] || el.type}</div>
-    <div class="prop-row"><span>X</span>M<span>${Math.round(el.x)}</span></div>
+    <div class="prop-row"><span>X</span><span>${Math.round(el.x)}</span></div>
     <div class="prop-row"><span>Y</span><span>${Math.round(el.y)}</span></div>
     <div class="prop-row"><span>Rotation</span><span>${Math.round((el.rotation * 180 / Math.PI) % 360)}\u00B0</span></div>
     ${extras}
@@ -230,7 +230,18 @@ function drawLaserBeam(ctx, el, selected) {
     ctx.rotate(el.rotation);
 
     ctx.beginPath();
-    ctx.roundRect(-14, -14 / 2.5, 14 * 1.5, 14 / 1.25, 3);
+    if (typeof ctx.roundRect === 'function') {
+        ctx.roundRect(-14, -14 / 2.5, 14 * 1.5, 14 / 1.25, 3);
+    } else {
+        const x = -14, y = -14 / 2.5, w = 14 * 1.5, h = 14 / 1.25, r = 3;
+        const rr = Math.min(r, w / 2, h / 2);
+        ctx.moveTo(x + rr, y);
+        ctx.arcTo(x + w, y, x + w, y + h, rr);
+        ctx.arcTo(x + w, y + h, x, y + h, rr);
+        ctx.arcTo(x, y + h, x, y, rr);
+        ctx.arcTo(x, y, x + w, y, rr);
+        ctx.closePath();
+    }
     ctx.fill();
     ctx.stroke();
 

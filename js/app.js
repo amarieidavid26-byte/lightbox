@@ -309,7 +309,7 @@ function loop() {
         canvas.width = Math.round(lw * dpr);
         canvas.height = Math.round(lh * dpr);
         ctx = canvas.getContext('2d');
-        ctx.scale(dpr, dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
     render(ctx, scene, computeRays());
     requestAnimationFrame(loop);
@@ -463,7 +463,7 @@ window.addEventListener('DOMContentLoaded', () => {
         canvas.width = Math.round(rect.width * dpr);
         canvas.height = Math.round(rect.height * dpr);
         ctx = canvas.getContext('2d');
-        ctx.scale(dpr, dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
     resize();
     window.addEventListener('resize', resize);

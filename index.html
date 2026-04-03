@@ -26,7 +26,7 @@
                     <line x1="10" y1="2" x2="10" y2="5"/>
                     <line x1="10" y1="15" x2="10" y2="18"/>
                     <line x1="2" y1="10" x2="5" y2="10"/>
-                    <line x1="15" y1="10" x1="18" y2="10"/>
+                    <line x1="15" y1="10" x2="18" y2="10"/>
                     <line x1="4.2" y1="4.2" x2="6.3" y2="6.3"/>
                     <line x1="13.7" y1="13.7" x2="15.8" y2="15.8"/>
                     <line x1="15.8" y1="4.2" x2="13.7" y2="6.3"/>
@@ -36,13 +36,13 @@
             <button class="tool-btn" data-tool="laser-beam" title="Laser Beam">
                 <svg viewBox="0 0 20 20">
                     <rect x="2" y="8" width="10" height="4" rx="2"/>
-                    <line x1="12" y1="10" x2="18" y2="10"?>
+                    <line x1="12" y1="10" x2="18" y2="10"/>
                     <polyline points="15,7 18,10 15,13"/>
                 </svg>
             </button>
         </div>
 
-        <div class="tool-selection">
+        <div class="tool-section">
             <button class="tool-btn" data-tool="flat-mirror" title="Flat Mirror">
                 <svg viewBox="0 0 20 20">
                     <line x1="4" y1="10" x2="16" y2="10"/>
@@ -79,7 +79,7 @@
                     <polyline points="15,5 5,15"/>
                 </svg>
             </button>
-            <button class="tool-bin" id="btn-grid" title="Toggle Grid">
+            <button class="tool-btn" id="btn-grid" title="Toggle Grid">
                 <svg viewBox="0 0 20 20">
                     <circle cx="5" cy="5" r="1" fill="currentColor" stroke="none"/>
                     <circle cx="10" cy="5" r="1" fill="currentColor" stroke="none"/>
@@ -89,7 +89,7 @@
                     <circle cx="15" cy="10" r="1" fill="currentColor" stroke="none"/>
                     <circle cx="5" cy="15" r="1" fill="currentColor" stroke="none"/>
                     <circle cx="10" cy="15" r="1" fill="currentColor" stroke="none"/>
-                    <circle cs="15" cy="15" r="1" fill="currentColor" stroke="none"/>
+                    <circle cx="15" cy="15" r="1" fill="currentColor" stroke="none"/>
                 </svg>
             </button>
             <button class="tool-btn" id="btn-clear" title="Clear All">
@@ -103,14 +103,14 @@
             </button>
         </div>
         
-        <div class="tool-selection">
+        <div class="tool-section">
             <button class="tool-btn" id="btn-preset-rainbow" title="Prism Rainbow">
                 <svg viewBox="0 0 20 20">
                     <path d="M 3 14 Q 3 6 10 6 Q 17 6 17 14" fill="none"/>
                     <path d="M 5 14 Q 5 8 10 8 Q 15 8 15 14" fill="none" opacity="0.6"/>
                 </svg>
             </button>
-            <button class="tool-bin" id="btn-preset-tunnel" title="Mirror Tunnel">
+            <button class="tool-btn" id="btn-preset-tunnel" title="Mirror Tunnel">
                 <svg viewbox="0 0 20 20">
                     <line x1="3" y1="6" x2="17" y2="6"/>
                     <line x1="3" y1="14" x2="17" y2="14"/>

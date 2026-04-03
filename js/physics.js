@@ -110,7 +110,7 @@ function intersectFlatMirror(ray, el) {
     const half = el.length / 2;
     const cos = Math.cos(el.rotation), sin = Math.sin(el.rotation);
     const p1 = { x: el.x - cos * half, y: el.y - sin * half };
-    const p2 = { x: el.x - cos * half, y: el.y - sin * half };
+    const p2 = { x: el.x + cos * half, y: el.y + sin * half };
     const hit = raySegmentIntersect(ray.origin, ray.direction, p1, p2);
     if (!hit) return null;
     return { t: hit.t, normal: hit.normal, point : {
@@ -121,7 +121,7 @@ function intersectFlatMirror(ray, el) {
 
 function intersectCurvedMirror(ray, el) {
     const fx = Math.cos(el.rotation), fy = Math.sin(el.rotation);
-    const cx = el.concave ? el.x + fx * el.radius : el.x - fy * el.radius;
+    const cx = el.concave ? el.x + fx * el.radius : el.x - fx * el.radius;
     const cy = el.concave ? el.y + fy * el.radius : el.y - fy * el.radius;
     const midAngle = Math.atan2(el.y - cy, el.x - cx);
     const hit = rayArcIntersect(ray.origin, ray.direction, { x: cx, y: cy }, el.radius, midAngle, el.arcAngle / 2);
@@ -147,7 +147,7 @@ function prismVertices(el) {
 }
 
 function intersectPrism(ray, el) {
-    const verts = prismVerticles(el);
+    const verts = prismVertices(el);
     let best = null;
     for (let i = 0; i < 3; i++) {
         const hit = raySegmentIntersect(ray.origin, ray.direction, verts[i], verts[(i + 1) % 3]);
@@ -172,7 +172,7 @@ function intersectLens(ray, el) {
     if (!hit) return null;
     return {
         t: hit.t, normal: hit.normal, isLens: true, 
-        lensData: { R, sign, ax, ay, xcx, xcy, halfSpan, retractiveIndex: el.retractiveIndex },
+        lensData: { R, sign, ax, ay, xcx, xcy, halfSpan, refractiveIndex: el.refractiveIndex },
         point: {
             x: ray.origin.x + ray.direction.x * hit.t,
             y: ray.origin.y + ray.direction.y * hit.t,
