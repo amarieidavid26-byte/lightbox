@@ -416,11 +416,15 @@ function clearScene() {
 
 function loadPresetRainbow() {
     clearScene();
-    const cx = canvas.clientWidth / 2, cy = canvas.clientHeight / 2;
-    scene.lights.push({ type: 'laser-beam', id: 'el_' + Date.now() + 'a',
-        x: cx - 170, y: cy + 10, rotation: -0.05, wavelength: null, intensity: 1.0 });
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    scene.lights.push({ type: 'laser-beam', id: 'el_' + Date.now() + 'a', 
+        x: w * 0.39, y: h * 0.44, rotation: 14 * Math.PI / 180, wavelength: null, intensity: 1.0 });
     scene.elements.push({ type: 'prism', id: 'el_' + Date.now() + 'b',
-        x: cx + 30, y: cy, rotation: 0, sideLength: 100, refractiveIndex: 1.52, dispersive: true });
+        x: w * 0.53, y: h * 0.52, rotation: 0,
+        sideLength: 100, refractiveIndex: 1.52, dispersive: true });
+    scene.elements.push({ type: 'curved-mirror', id: 'el_' + Date.now() + 'c',
+        x: w * 0.86, y: h * 0.77, rotation: 5 * Math.PI / 180,
+        radius: 200, arcAngle: Math.PI / 3, concave: true, reflectivity: 1.0 });
 }
 
 function loadPresetTunnel() {
