@@ -408,12 +408,55 @@ function onKey(e) {
     }
 }
 
+function clearScene() {
+    scene.elements = [];
+    scene.lights = [];
+    scene.selectedId = null;
+}
+
+function loadPresetRainbow() {
+    clearScene();
+    const cx = canvas.clientWidth / 2, cy = canvas.clientHeight / 2;
+    scene.lights.push({ type: 'laser-beam', id: 'el_' + Date.now() + 'a',
+        x: cx - 170, y: cy + 10, rotation: -0.05, wavelength: null, intensity: 1.0 });
+    scene.elements.push({ type: 'prism', id: 'el_' + Date.now() + 'b',
+        x: cx + 30, y: cy, rotation: 0, sideLength: 100, refractiveIndex: 1.52, dispersive: true });
+}
+
+function loadPresetTunnel() {
+    clearScene();
+    const cx = canvas.clientWidth / 2, cy = canvas.clientHeight / 2;
+    scene.lights.push({ type: "laser-beam", id: 'el_' + Date.now() + 'a',
+        x: cx - 220, y: cy - 25, rotation: Math.PI / 14, wavelength: null, intensity: 1.0 });
+    scene.elements.push(
+        { type: 'flat-mirror', id: 'el_' + Date.now() + 'b', x: cx, y: cy - 80, rotation: 0, length: 260, reflectivity: 1.0 },
+        { type: 'flat-mirror', id: 'el_' + Date.now() + 'c', x: cx, y: cy + 80, rotation: 0, length: 260, reflectivity: 1.0 }
+    );
+}
+
+function loadPresetLens() {
+    clearScene();
+    const cx = canvas.clientWidth / 2, cy = canvas.clientHeight / 2;
+    scene.lights.push({ type: "point-source", id: 'el_' + Date.now() + 'a',
+        x: cx - 200, y: cy, rotation: 0, rayCount: 20, wavelength: null, intensity: 1.0 });
+    scene.elements.push({ type: 'lens', id: 'el_' + Date.now() + 'b',
+        x: cx, y: cy, rotation: 0, height: 120, focalLength: 120, refractiveIndex: 1.5 });
+}
+
+function loadPresetDarkSide() {
+    clearScene();
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    scene.lights.push({ type: 'laser-beam', id: 'ds_' + Math.random().toString(36).slice(2, 8),
+        x: w * 0.14, y: h * 0.40, rotation: 0.17, wavelength: null, intensity: 1.0 });
+    scene.elements.push({ type: 'prism', id: 'ds_' + Math.random().toString(36).slice(2,8),
+        x: w * 0.42, y: h * 0.46, rotation: -Math.PI / 10, 
+        sideLength: 150, refractiveIndex: 1.52, dispersive: true });
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     canvas = document.getElementById('canvas');
     dpr = window.devicePixelRatio || 1;
 
-    canvas.addEventListener('mousemove', onMove);
-    window.addEventListener('keydown', onKey);
 
     function resize() {
         const rect = canvas.getBoundingClientRect();
@@ -424,11 +467,13 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     resize();
     window.addEventListener('resize', resize);
-    loop();
 
+    canvas.addEventListener('mousemove', onMove);
     canvas.addEventListener('mousedown', onDown);
     canvas.addEventListener('mouseup', onUp);
     canvas.addEventListener('dblclick', onDbl);
+    canvas.addEventListener('contextmenu', e => e.preventDefault());
+    window.addEventListener('keydown', onKey);
     
     document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -438,4 +483,30 @@ window.addEventListener('DOMContentLoaded', () => {
             syncToolbar();
         });
     });
+
+    const btnGrid = document.getElementById('btn-grid');
+    btnGrid.addEventListener('click', () => {
+        scene.showGrid = !scene.showGrid;
+        btnGrid.classList.toggle('active', scene.showGrid);
+    });
+    btnGrid.classList.toggle('active', scene.showGrid);
+
+    document.getElementById('btn-clear').addEventListener('click', () => {
+        scene.elements = []; scene.lights = []; scene.selectedId = null;
+    });
+
+    document.getElementById('btn-preset-rainbow').addEventListener('click', loadPresetRainbow);
+    document.getElementById('btn-preset-tunnel').addEventListener('click', loadPresetTunnel);
+    document.getElementById('btn-preset-lens').addEventListener('click', loadPresetLens);
+    document.getElementById('btn-preset-darkside').addEventListener('click', loadPresetDarkSide);
+
+    setInterval(() => {
+        if (PLACING.includes(scene.tool)) canvas.style.cursor = 'crosshair';
+        else if (scene.rotating || scene.dragging) canvas.style.cursor = 'grabbing';
+        else canvas.style.cursor = 'default';
+    }, 100);
+
+    syncToolbar();
+    loadPresetRainbow();
+    loop();
 });

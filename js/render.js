@@ -15,6 +15,8 @@ function render(ctx, scene, segs) {
         const sel = all.find(e => e.id === scene.selectedId);
         if (sel) drawSelection(ctx, sel);
     }
+
+    updatePropsPanel(scene);
 }
 
 function drawRays(ctx, segs) {
@@ -31,6 +33,39 @@ function drawRays(ctx, segs) {
         ctx.stroke();
     }
     ctx.restore();
+}
+
+function updatePropsPanel(scene) {
+    const panel = document.getElementById('properties-panel');
+    if (!panel) return; 
+    if (!scene.selectedId) { panel.style.display = 'none'; return; }
+    const el = [...scene.elements, ...scene.lights].find(e => e.id === scene.selectedId);
+    if (!el) { panel.style.display = 'none'; return; }
+
+    panel.style.display = 'block';
+    const names = {
+        'flat-mirror': 'Flat Mirror',
+        'curved-mirror': 'Curved Mirror',
+        'lens': 'Lens',
+        'point-source': 'Point Source',
+        'laser-beam': 'Laser Beam',
+    };
+
+    let extras = '';
+    if (el.type === 'flat-mirror') extras = `<div class="prop-row"><span>Length</span><span>${el.length}px</span></div>`;
+    if (el.type === 'curved-mirror') extras = `<div class="prop-row"><span>Radius</span><span>${el.radius}px</span></div><div class="prop-row"><span>Mode</span><span>${el.concave ? 'Concave' : 'Convex'}</span></div>`;
+    if (el.type === 'lens') extras = `<div class="prop-row"><span>Focal Length</span><span>${el.focalLength}px</span></div><div class="prop-row"><span>Type</span><span>${el.focalLength > 0 ? 'Convex' : 'Concave'}</span></div>`;
+    if (el.type === 'prism') extras = `<div class="prop-row"><span>Side</span><span>${el.sideLength}px</span></div><div class="prop-row"><span>n</span><span>${el.refractiveIndex}</span></div>`;
+    if(el.type === 'point-source') extras =`<div class="prop-row"><span>Rays</span><span>${el.rayCount}</span></div>`;
+
+    panel.innerHTML = `
+    <div class="prop-title">${names[el.type] || el.type}</div>
+    <div class="prop-row"><span>X</span>M<span>${Math.round(el.x)}</span></div>
+    <div class="prop-row"><span>Y</span><span>${Math.round(el.y)}</span></div>
+    <div class="prop-row"><span>Rotation</span><span>${Math.round((el.rotation * 180 / Math.PI) % 360)}\u00B0</span></div>
+    ${extras}
+    <div class="prop-hint">drag \u25CE to rotate \u00B7 dbl-click to toggle</div>
+    `;
 }
 
 function drawElement(ctx, el, selected) {
