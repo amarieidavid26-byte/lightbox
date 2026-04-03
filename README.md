@@ -14,9 +14,9 @@ try it here! https://lightbox-beta.vercel.app/
 - 4 built-in demo scenes
 
 ## how the physics works 
-reflection uses the standard formula `d_reflect = d - 2(d*n)n`. curved mirrors compute the normal at the hit point from the center of curvature.
-refraction implements snell's law in vector form. total internal reflection kicks in automatically when the angle is too steep. lenses model both surfaces separately: ray enters, refracts, travels thru the glass, hits the exit surface, refracts again.
-prism dispersion uses the cauchy equation `n(λ) = 1.522 + 0.00459/λ^2` to get slightly different refractive index for each wavelength. 
+- reflection uses the standard formula `d_reflect = d - 2(d*n)n`. curved mirrors compute the normal at the hit point from the center of curvature.
+- refraction implements snell's law in vector form. total internal reflection kicks in automatically when the angle is too steep. lenses model both surfaces separately: ray enters, refracts, travels thru the glass, hits the exit surface, refracts again.
+- prism dispersion uses the cauchy equation `n(λ) = 1.522 + 0.00459/λ^2` to get slightly different refractive index for each wavelength. 
 
 ##built with 
 - vanilla javascript + html canvas
